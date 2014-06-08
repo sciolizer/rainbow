@@ -5,7 +5,7 @@ import Graphics.Input as Input
 import Debug
 import Dict
 import List
-
+import Set
 
 main = lift3 scene Window.dimensions Mouse.position state
 
@@ -14,16 +14,36 @@ type State = { selectedColor: String, grid: Dict.Dict (Int,Int) Cell }
 type Cell = { colorName : String, color : Color, inBound : Int, outBound : Int }
 
 state : Signal State
-state = foldp accum {selectedColor="white",grid=Dict.empty} (lift3 (,,) Mouse.isDown Mouse.position (fps 10))
+state = foldp accum {selectedColor="white",grid=Dict.empty} (lift4 (,,,) Mouse.isDown Mouse.position (fps 10) (lift Set.fromList Keyboard.keysDown))
 
-accum (d,(x,y),step) pre = 
+hotKeys = Dict.fromList [
+  (49, "red"),
+  (50, "orange"),
+  (51, "yellow"),
+  (52, "green"),
+  (53, "blue"),
+  (54, "purple"),
+  (82, "red"),
+  (79, "orange"),
+  (89, "yellow"),
+  (71, "green"),
+  (66, "blue"),
+  (86, "purple"), -- v
+  (80, "purple") -- p
+  ]
+
+hotKeyNums = Set.fromList (Dict.keys hotKeys)
+  
+accum (d,(x,y),step,kys) pre = 
   let prev = { pre - grid | grid = fluid step pre.grid }
       headerRowClick = 
         y < blockHeight &&
       x < blockWidth * (length rainbow)
   in { selectedColor =
     if d && headerRowClick 
-      then last (take (1 + (x `div` blockWidth)) rainbow) else prev.selectedColor,
+      then last (take (1 + (x `div` blockWidth)) rainbow) else 
+      let relevantKeys = Set.toList (Set.intersect hotKeyNums kys) in
+      if List.isEmpty relevantKeys then prev.selectedColor else  Dict.getOrFail (List.head relevantKeys) hotKeys,
     grid =
      if not d || headerRowClick then prev.grid else
      let key = (x `div` blockWidth, (y - blockHeight) `div` blockHeight)

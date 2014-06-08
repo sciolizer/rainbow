@@ -14,7 +14,12 @@ type State = { selectedColor: String, grid: Dict.Dict (Int,Int) Cell }
 type Cell = { colorName : String, color : Color, inBound : Int, outBound : Int }
 
 state : Signal State
-state = foldp accum {selectedColor="white",grid=Dict.empty} (lift4 (,,,) Mouse.isDown Mouse.position (fps 10) (lift Set.fromList Keyboard.keysDown))
+state = foldp accum {selectedColor="white",grid=Dict.empty}
+  (lift4 (,,,) 
+    Mouse.isDown 
+    (snd <~ keepIf fst (False,(0,0)) ((,) <~ Mouse.isDown ~ Mouse.position))
+    (fps 1) 
+    (lift Set.fromList Keyboard.keysDown))
 
 hotKeys = Dict.fromList [
   (49, "red"),

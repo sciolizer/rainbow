@@ -22,6 +22,7 @@ state = foldp accum {selectedColor="white",grid=Dict.empty}
     (lift Set.fromList Keyboard.keysDown))
 
 hotKeys = Dict.fromList [
+  (48, "white"),
   (49, "red"),
   (50, "orange"),
   (51, "yellow"),
@@ -34,7 +35,8 @@ hotKeys = Dict.fromList [
   (71, "green"),
   (66, "blue"),
   (86, "purple"), -- v
-  (80, "purple") -- p
+  (80, "purple"), -- p
+  (87, "white")
   ]
 
 hotKeyNums = Set.fromList (Dict.keys hotKeys)
@@ -172,7 +174,3 @@ headerButton sel color label = container blockWidth blockHeight middle
 
 blockWidth = 100
 blockHeight = 50
-
-check : Input.Input Bool
-check = Input.input True
-

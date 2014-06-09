@@ -7,7 +7,7 @@ import Dict
 import List
 import Set
 
-main = lift3 scene Window.dimensions Mouse.position state
+main = scene <~ Window.dimensions ~ state
 
 type State = { selectedColor: String, grid: Dict.Dict (Int,Int) Cell }
 
@@ -99,16 +99,10 @@ subsequentColor x =
     "blue" -> Just "purple"
     otherwise -> Nothing
 
-scene (w,h) (x,y) sel = flow down
+scene (w,h) sel = flow down
   [  header sel.selectedColor,
-  flow outward ((renderGrid (w,h) sel) ++ [
+  flow outward (renderGrid (w,h) sel)]
   
- container w h
-  (topLeftAt 
-    (absolute (x - (x `mod` blockWidth)))
-    (absolute (y - headerHeight - (y `mod` blockHeight)))) <| collage blockWidth blockHeight
-  [outlined (dotted clearGrey) (rect blockWidth blockHeight)]])]
-
 renderGrid : (Int,Int) -> State -> [Element]
 renderGrid (w,h) sel = map (draw (w,h)) (Dict.toList sel.grid)
 
